@@ -47,7 +47,7 @@ class ChatBar extends Component {
   }
 
   render() {
-    const welcomemessage = `Welcome, ${this.state.currentUser}`
+    // const welcomemessage = `Welcome, ${this.state.currentUser}`
     return (
       <footer>
         <input
@@ -58,8 +58,9 @@ class ChatBar extends Component {
           id="username"
           type="text"
           placeholder="Your Name (Optional)"
-          value= {welcomemessage}
+          value= {this.state.currentUser}
         />
+
         <input
           onKeyPress={this.handleEnterMessage}
           onChange={this.handleChange}
