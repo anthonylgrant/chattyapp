@@ -2,6 +2,8 @@
 
 const express = require('express');
 const SocketServer = require('ws').Server;
+const uuid = require('node-uuid');
+// console.log(uuid);
 
 // Set the port to 4000
 const PORT = 4000;
@@ -24,14 +26,48 @@ wss.on('connection', (ws) => {
   //
   ws.on('message', function incoming(message) {
     let parsedMessage = JSON.parse(message);
-    console.log('User', parsedMessage.username, "said", parsedMessage.content);
+    // console.log(parsedMessage)
+    // console.log("Type: ", parsedMessage.type, 'User', parsedMessage.username, "said", parsedMessage.content);
+    switch (parsedMessage.type) {
+      case "postMessage":
+        parsedMessage.id = uuid.v4();
+        parsedMessage.type = "incomingMessage";
+        break;
+      case "postNotification":
+        //TODO
+        break;
+    default:
+      console.log("unknown message type!", parsedMessage.type)
+
+    }
+
+
+
+    console.log(parsedMessage);
+    // stringified message
+    let stringMessage = JSON.stringify(parsedMessage);
+    console.log("This is the string message: ", stringMessage)
+
+
+    broadcastMessage(stringMessage);
 
   });
+
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => console.log('Client disconnected'));
 
 });
+
+
+function broadcastMessage (message) {
+  wss.clients.forEach(function each(client) {
+  // if sending client doesn't want to see their sent message
+  // if (client !== ws) client.send(stringMessage);
+  client.send(message);
+  console.log("Instance of Client: ", Object.getPrototypeOf(client));
+  });
+}
 
 // SERVER TODO:
 /// Accept Messages - needs event handler

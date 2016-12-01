@@ -15,6 +15,10 @@ class ChatBar extends Component {
   //       -if not, make a submit
   //       - if same, do nothing
 
+  componentDidMount() {
+    this.msgInput.focus()
+  }
+
   handleMessageChange = e => {
     this.setState({currentMessage: e.target.value});
   }
@@ -27,18 +31,26 @@ class ChatBar extends Component {
       e.target.value="";
     }
   }
-  handleEnterUsername = e => {
-    if (e.which === 13) {
+
+  handleKeypress = e => {
+    if (e.key === 'Enter') {
       this.props.createUsername(e.target.value)
+      this.msgInput.focus();
     }
+  }
+
+  handleBlurUsername = (e) => {
+    this.props.createUsername(e.target.value)
   }
 
   render() {
     return (
       <footer>
         <input
-          onKeyPress={this.handleEnterUsername}
+          onKeyPress={ this.handleKeypress }
+          ref = { inp => { this.usrInput = inp } }
           onChange={this.handleUserChange}
+          onBlur={this.handleBlurUsername}
           id="username"
           type="text"
           placeholder="Your Name (Optional)"
@@ -50,6 +62,7 @@ class ChatBar extends Component {
           id="new-message"
           type="text"
           placeholder="Type a message and hit ENTER"
+          ref = { inp => { this.msgInput = inp } }
         />
       </footer>
     );

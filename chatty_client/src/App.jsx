@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
 import ChatBar from './ChatBar.jsx';
 import MessageList from './MessageList.jsx';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'; // ES6
 
 var data =
   {
-    currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
+    type: "",
+    currentUser: {name: ""}, // optional. if currentUser is not defined, it means the user is Anonymous
     messages: []
   };
 
@@ -15,32 +17,72 @@ class App extends Component {
     // this.createChatMessage = this.createChatMessage.bind(this);
   }
 
-  createChatMessage = text => {
-   const newMessage =
-    {
+  createChatMessage = (newmsg) => {
+    const newMessage = {
+      type: "postMessage",
       username: this.state.currentUser.name,
-      content: text
+      content: newmsg
     };
     const messages = this.state.messages.concat(newMessage);
     // Update the state of the app component.
     // Calling setState will trigger a call to rend
-    this.setState({messages: messages})
+    // this.setState({messages: messages})
+    if (this.state.currentUser.name) {
     this.socket.send(JSON.stringify(newMessage))
-    console.log("This is the new message: ", newMessage)
+    console.log("This is the new message: ", newMessage);
+    } else {
+      alert("Please enter your username!")
+    }
   }
 
-  createUsername = name => {
-    this.setState({currentUser: {name: name}})
+  createUsername = (name) => {
+    // TODO:
+    const newNotification = {
+      type: "postNotification",
+      content: `${this.state.currentUser} changed their name to ${name}`
+    }
+    this.setState({currentUser: {name: name}}) // correct
+    // this.state.currentUser = {name: name}; // anti-React
+    console.log("this.state", this.state);
     console.log(name)
-
   }
 
   componentDidMount() {
     console.log("componentDidMount <App />");
     this.socket = new WebSocket("ws://localhost:4000");
-    console.log(this);
-    console.log("Connected to Server: ", this.socket);
 
+    this.socket.onopen = (event) => {
+      console.log("Connected to server");
+    };
+
+    this.socket.onmessage = (event) => {
+      console.log('this', this);
+      console.log(event.data)
+      const data = JSON.parse(event.data);
+
+      switch(data.type) {
+        case "incomingMessage":
+        // handle incoming message
+        console.log("This is the onmessage data: ", data);
+        let newMessages = this.state.messages.concat([data])
+        this.setState({messages: newMessages})
+          break;
+        case "incomingNotification":
+        // handle incoming notification
+        break;
+      default:
+        // show an error in the console if the message type is unknown
+        throw new Error("Unknown event type " + data.type);
+        }
+
+
+    }
+  }
+
+  componentDidUpdate() {
+    // Scroll new message into view
+    let element = document.getElementById("message-list").lastChild;
+    element.scrollIntoView();
   }
 
   render() {
