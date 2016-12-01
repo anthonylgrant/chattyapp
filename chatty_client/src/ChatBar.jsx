@@ -19,19 +19,26 @@ class ChatBar extends Component {
     this.msgInput.focus()
   }
 
+  //handle state change
   handleMessageChange = e => {
     this.setState({currentMessage: e.target.value});
   }
   handleUserChange = e => {
     this.setState({currentUser: e.target.value});
   }
+
+  //handle app component functions
   handleEnterMessage = e => {
     if (e.which === 13) {
       this.props.createChatMessage(e.target.value)
       e.target.value="";
     }
   }
+  handleBlurUsername = (e) => {
+    this.props.createUsername(e.target.value)
+  }
 
+  // handle focus from username
   handleKeypress = e => {
     if (e.key === 'Enter') {
       this.props.createUsername(e.target.value)
@@ -39,22 +46,19 @@ class ChatBar extends Component {
     }
   }
 
-  handleBlurUsername = (e) => {
-    this.props.createUsername(e.target.value)
-  }
-
   render() {
+    const welcomemessage = `Welcome, ${this.state.currentUser}`
     return (
       <footer>
         <input
           onKeyPress={ this.handleKeypress }
-          ref = { inp => { this.usrInput = inp } }
           onChange={this.handleUserChange}
+          ref = { inp => { this.usrInput = inp } }
           onBlur={this.handleBlurUsername}
           id="username"
           type="text"
           placeholder="Your Name (Optional)"
-          value={this.state.currentUser}
+          value= {welcomemessage}
         />
         <input
           onKeyPress={this.handleEnterMessage}

@@ -5,9 +5,9 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group'; // ES6
 
 var data =
   {
-    type: "",
-    currentUser: {name: ""}, // optional. if currentUser is not defined, it means the user is Anonymous
-    messages: []
+    currentUser: {name: "Anonymous"}, // optional. if currentUser is not defined, it means the user is Anonymous
+    messages: [],
+    userCount: 0
   };
 
 class App extends Component {
@@ -28,8 +28,8 @@ class App extends Component {
     // Calling setState will trigger a call to rend
     // this.setState({messages: messages})
     if (this.state.currentUser.name) {
-    this.socket.send(JSON.stringify(newMessage))
-    console.log("This is the new message: ", newMessage);
+      this.socket.send(JSON.stringify(newMessage))
+      console.log("This is the new message: ", newMessage);
     } else {
       alert("Please enter your username!")
     }
@@ -39,12 +39,12 @@ class App extends Component {
     // TODO:
     const newNotification = {
       type: "postNotification",
-      content: `${this.state.currentUser} changed their name to ${name}`
+      content: `${this.state.currentUser.name} changed their name to ${name}`
     }
     this.setState({currentUser: {name: name}}) // correct
     // this.state.currentUser = {name: name}; // anti-React
-    console.log("this.state", this.state);
-    console.log(name)
+    this.socket.send(JSON.stringify(newNotification))
+    console.log("This is the new notification: ", newNotification);
   }
 
   componentDidMount() {
@@ -54,22 +54,23 @@ class App extends Component {
     this.socket.onopen = (event) => {
       console.log("Connected to server");
     };
-
+    console.log(this.socket);
     this.socket.onmessage = (event) => {
       console.log('this', this);
-      console.log(event.data)
+      console.log("This is the event data: ",event.data)
       const data = JSON.parse(event.data);
-
       switch(data.type) {
+        case "userCounter":
+          console.log("There are", data.content, "users logged in")
+          let newUserCount = data.content;
+          this.setState({userCount: newUserCount});
         case "incomingMessage":
-        // handle incoming message
-        console.log("This is the onmessage data: ", data);
-        let newMessages = this.state.messages.concat([data])
-        this.setState({messages: newMessages})
-          break;
         case "incomingNotification":
-        // handle incoming notification
+          console.log("This is the onmessage data: ", data);
+          let newMessages = this.state.messages.concat([data]);
+          this.setState({messages: newMessages})
         break;
+
       default:
         // show an error in the console if the message type is unknown
         throw new Error("Unknown event type " + data.type);
@@ -91,6 +92,7 @@ class App extends Component {
       <div className="wrapper">
         <nav>
           <h1>Chatty</h1>
+          <h3>{this.state.userCount} users online</h3>
         </nav>
         <MessageList
           messages={this.state.messages}

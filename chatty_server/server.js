@@ -21,38 +21,30 @@ const wss = new SocketServer({ server });
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
-  console.log('Client connected');
-  // console.log(wss.clients)
-  //
+  console.log('client connected');
+
+  //Broadcast # of users logged in
+  broadcastUserCount();
+  // Event handling for messages received from client
   ws.on('message', function incoming(message) {
     let parsedMessage = JSON.parse(message);
-    // console.log(parsedMessage)
-    // console.log("Type: ", parsedMessage.type, 'User', parsedMessage.username, "said", parsedMessage.content);
     switch (parsedMessage.type) {
       case "postMessage":
         parsedMessage.id = uuid.v4();
         parsedMessage.type = "incomingMessage";
         break;
       case "postNotification":
-        //TODO
+        parsedMessage.type = "incomingNotification"
         break;
-    default:
+      default:
       console.log("unknown message type!", parsedMessage.type)
-
     }
 
-
-
-    console.log(parsedMessage);
     // stringified message
     let stringMessage = JSON.stringify(parsedMessage);
-    console.log("This is the string message: ", stringMessage)
-
 
     broadcastMessage(stringMessage);
-
   });
-
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => console.log('Client disconnected'));
@@ -65,11 +57,16 @@ function broadcastMessage (message) {
   // if sending client doesn't want to see their sent message
   // if (client !== ws) client.send(stringMessage);
   client.send(message);
-  console.log("Instance of Client: ", Object.getPrototypeOf(client));
+  // console.log("Instance of Client: ", Object.getPrototypeOf(client));
   });
 }
 
-// SERVER TODO:
-/// Accept Messages - needs event handler
-/// &&
-/// Re-broadcast to all clients -
+function broadcastUserCount () {
+  wss.clients.forEach(function each(client) {
+    console.log("# of users logged in :", wss.clients.length)
+    client.send(JSON.stringify({
+      type: "userCounter",
+      content: wss.clients.length
+    }));
+  });
+}
