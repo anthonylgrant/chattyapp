@@ -5,9 +5,11 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group'; // ES6
 
 var data =
   {
-    currentUser: {name: "Anonymous"}, // optional. if currentUser is not defined, it means the user is Anonymous
+    currentUser: {
+      name: "Anonymous"
+    }, // optional. if currentUser is not defined, it means the user is Anonymous
     messages: [],
-    userCount: 0
+    userCount: 1
   };
 
 class App extends Component {
@@ -41,9 +43,11 @@ class App extends Component {
       type: "postNotification",
       content: `${this.state.currentUser.name} changed their name to ${name}`
     }
+    // if (currentUser.name !== name) {
     this.setState({currentUser: {name: name}}) // correct
     // this.state.currentUser = {name: name}; // anti-React
     this.socket.send(JSON.stringify(newNotification))
+   // }
     console.log("This is the new notification: ", newNotification);
   }
 
@@ -64,6 +68,7 @@ class App extends Component {
           console.log("There are", data.content, "users logged in")
           let newUserCount = data.content;
           this.setState({userCount: newUserCount});
+          break;
         case "incomingMessage":
         case "incomingNotification":
           console.log("This is the onmessage data: ", data);
@@ -75,15 +80,18 @@ class App extends Component {
         // show an error in the console if the message type is unknown
         throw new Error("Unknown event type " + data.type);
         }
-
-
     }
   }
 
   componentDidUpdate() {
     // Scroll new message into view
-    let element = document.getElementById("message-list").lastChild;
-    element.scrollIntoView();
+    let el = document.getElementById("message-list").lastChild;
+    console.log("this is el: ", el)
+    console.log("This is the el var: ", typeof el);
+    if (el) {
+      el.scrollIntoView();
+    }
+    // }
   }
 
   render() {

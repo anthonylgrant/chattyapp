@@ -27,7 +27,7 @@ class ChatBar extends Component {
     this.setState({currentUser: e.target.value});
   }
 
-  //handle app component functions
+  // handle app component functions
   handleEnterMessage = e => {
     if (e.which === 13) {
       this.props.createChatMessage(e.target.value)
@@ -35,14 +35,18 @@ class ChatBar extends Component {
     }
   }
   handleBlurUsername = (e) => {
+    if (this.props.currentUser.name !== e.target.value) {
+      // debugger;
     this.props.createUsername(e.target.value)
+    }
   }
 
   // handle focus from username
   handleKeypress = e => {
     if (e.key === 'Enter') {
-      this.props.createUsername(e.target.value)
+      // this.props.createUsername(e.target.value)
       this.msgInput.focus();
+      e.target.value="";
     }
   }
 

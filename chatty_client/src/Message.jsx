@@ -8,8 +8,16 @@ class Message extends Component {
     case "incomingMessage":
       return (
         <div className="message">
-          <span className="username">{this.props.username}</span>
-          <span className="content">{this.props.content}
+          <span
+          className="username"
+          style= { {color: this.props.color} }
+          >
+            {this.props.username}
+          </span>
+          <span
+          className="content"
+          >
+            {this.props.content}
           </span>
         </div>
       );
@@ -20,18 +28,11 @@ class Message extends Component {
         {this.props.content}
         </div>
       )
-
-
+    default:
+      console.warn("message component received incorrect type: ", this.props.type)
     }
 
-    return (
-      <div className="message">
-      <span className="username">{this.props.username}</span>
-        <span className="content">{this.props.content}
-        </span>
-        <span className="username">ID: {this.props.index}</span>
-      </div>
-    );
+
   }
 }
 export default Message;

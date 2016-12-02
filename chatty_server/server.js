@@ -3,6 +3,12 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
 const uuid = require('node-uuid');
+const colors = [
+      "#FF570A",
+      "#12355B",
+      "#D72638",
+      "#420039"
+    ];
 // console.log(uuid);
 
 // Set the port to 4000
@@ -21,10 +27,11 @@ const wss = new SocketServer({ server });
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
-  console.log('client connected');
 
+  console.log('client connected');
   //Broadcast # of users logged in
   broadcastUserCount();
+  ws.color = colors[wss.clients.length % colors.length];
   // Event handling for messages received from client
   ws.on('message', function incoming(message) {
     let parsedMessage = JSON.parse(message);
@@ -32,12 +39,14 @@ wss.on('connection', (ws) => {
       case "postMessage":
         parsedMessage.id = uuid.v4();
         parsedMessage.type = "incomingMessage";
+        parsedMessage.color = ws.color;
+        console.log("WS COLOR IS: ", parsedMessage.color)
         break;
       case "postNotification":
         parsedMessage.type = "incomingNotification"
         break;
       default:
-      console.log("unknown message type!", parsedMessage.type)
+      console.log("unknown message type!: ", parsedMessage.type)
     }
 
     // stringified message
@@ -47,7 +56,9 @@ wss.on('connection', (ws) => {
   });
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', (ws) => {
+    broadcastUserCount();
+    console.log('Client disconnected')});
 
 });
 
@@ -71,21 +82,30 @@ function broadcastUserCount () {
   });
 }
 
-function assignUserColor () {
-  wss.clients.forEach(function each(client) {
-    console.log("# of users logged in :", getRandomColor())
-    client.send(JSON.stringify({
-      type: "userColor",
-      content: getRandomColor();
-    })
-  })
 
-  function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-}
+
+// function assignUserColor () {
+//   wss.clients.forEach(function each(client) {
+//     // var colors = {
+//     //     orange: "#FF570A",
+//     //     blue: "#12355B",
+//     //     red: "#D72638",
+//     //     purple: "#420039"
+//     //   }
+
+//     client.send(JSON.stringify( {
+//       type: "userColor",
+//       content: ""
+//     }))
+//   }
+// }
+
+
+// function getRandomColor() {
+//   var letters = '0123456789ABCDEF';
+//   var color = '#';
+//   for (var i = 0; i < 6; i++ ) {
+//     color += letters[Math.floor(Math.random() * 16)];
+//   }
+//   return color;
+// }
