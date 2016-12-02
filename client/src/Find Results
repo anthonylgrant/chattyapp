@@ -1,0 +1,10 @@
+Searching 25 files for "debugger;"
+
+/Users/anthonygrant/lighthouse/week5/chatty/chatty_client/src/ChatBar.jsx:
+   25    }
+   26    handleUserChange = e => {
+   27:     debugger;
+   28      if (this.props.currentUser !== e.target.value)
+   29      this.setState({currentUser: e.target.value});
+
+1 match in 1 file
